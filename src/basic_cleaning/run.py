@@ -17,6 +17,7 @@ def go(args):
 
     run = wandb.init(job_type="basic_cleaning")
     run.config.update(args)
+    
 
     # Download input artifact. This will also log that this script is using this
     # particular version of the artifact
@@ -24,7 +25,9 @@ def go(args):
 
     ######################
     # YOUR CODE HERE     #
-    ######################logger.info("Downloading artifact")
+    ######################
+    logger.info(f"Running basic_cleaning with parameters: {args}")
+    logger.info("Downloading artifact")
     artifact = run.use_artifact(args.input_artifact)
     artifact_path = artifact.file()
     
@@ -44,9 +47,9 @@ def go(args):
     
     logger.info("Creating artifact save")
     artifact = wandb.Artifact(
-        name=args.output_artifact_name,
-        type=args.output_artifact_type,
-        description=args.output_artifact_description,
+        name=args.output_artifact,
+        type=args.output_type,
+        description=args.output_description,
     )
     artifact.add_file(filename)
 
@@ -55,9 +58,6 @@ def go(args):
     
     os.remove(filename)
     
-    
-
-
 if __name__ == "__main__":
 
     parser = argparse.ArgumentParser(description="This steps cleans the data")
@@ -65,7 +65,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "--input_artifact",
         type=str,
-        help="Fully-qualified name for the input artifact",
+        help="Name of the input artifact",
         required=True
     )
 
@@ -79,28 +79,28 @@ if __name__ == "__main__":
     parser.add_argument(
         "--output_type",
         type=str,
-        help="Type of the artifact",
+        help="Type of the output artifact",
         required=True
     )
 
     parser.add_argument(
         "--output_description",
         type=str,
-        help="Description for the artifact",
+        help="Description of the output artifact",
         required=True
     )
 
     parser.add_argument(
         "--min_price",
         type=float,
-        help="Minimum price for cleaning outliers",
+        help="Minimum number for price",
         required=True
     )
 
     parser.add_argument(
         "--max_price",
         type=float,
-        help="Maximum price for cleaning outliers",
+        help="Maximum number for price",
         required=True
     )
 

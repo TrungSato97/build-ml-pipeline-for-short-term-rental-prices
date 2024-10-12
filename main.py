@@ -7,6 +7,8 @@ import wandb
 import hydra
 from omegaconf import DictConfig
 
+# set HYDRA_FULL_ERROR=1
+
 _steps = [
     "download",
     "basic_cleaning",
@@ -21,7 +23,7 @@ _steps = [
 
 
 # This automatically reads in the configuration
-@hydra.main(config_name='config')
+@hydra.main(config_name='config.yaml')
 def go(config: DictConfig):
 
     # Setup the wandb experiment. All runs will be grouped under this name
@@ -32,35 +34,37 @@ def go(config: DictConfig):
     steps_par = config['main']['steps']
     active_steps = steps_par.split(",") if steps_par != "all" else _steps
 
+    root_path = hydra.utils.get_original_cwd()
+    
     # Move to a temporary directory
     with tempfile.TemporaryDirectory() as tmp_dir:
 
         if "download" in active_steps:
             # Download file and load in W&B
             _ = mlflow.run(
-                f"{config['main']['components_repository']}/get_data",
+                os.path.join(hydra.utils.get_original_cwd(), "components", "get_data"),
+                # os.path.join(root_path, "components", "get_data"),
                 "main",
                 version='main',
                 parameters={
                     "sample": config["etl"]["sample"],
                     "artifact_name": "sample.csv",
-                    "artifact_type": "raw_data",
+                    "artifact_type": "sample",
                     "artifact_description": "Raw file as downloaded"
                 },
             )
 
-        
         if "basic_cleaning" in active_steps:
             _ = mlflow.run(
                 os.path.join(hydra.utils.get_original_cwd(), "src", "basic_cleaning"),
                 "main",
                 parameters={
-                    "input_artifact": "sample.csv:latest",
+                    "input_artifact": "nyc_airbnb/sample.csv:latest",
                     "output_artifact": "clean_sample.csv",
                     "output_type": "clean_sample",
-                    "output_description": "Data with outliers and null values removed",
-                    "min_price": config['etl']['min_price'],
-                    "max_price": config['etl']['max_price']
+                    "output_description": '"data with outliers and null values removed"',
+                    "min_price": float(config['etl']['min_price']),
+                    "max_price": float(config['etl']['max_price'])
                 },
             )
 
@@ -70,7 +74,7 @@ def go(config: DictConfig):
                 "main",
                 parameters={
                     "csv": "clean_sample.csv:latest",
-                    "ref": "clean_sample.csv:reference",
+                    "ref": "clean_sample.csv:latest",
                     "kl_threshold": config["data_check"]["kl_threshold"],
                     "min_price": config['etl']['min_price'],
                     "max_price": config['etl']['max_price']
@@ -79,7 +83,8 @@ def go(config: DictConfig):
 
         if "data_split" in active_steps:
             _ = mlflow.run(
-                f"{config['main']['components_repository']}/train_val_test_split",
+                os.path.join(hydra.utils.get_original_cwd(), "components", "train_val_test_split"),
+                # f"{config['main']['components_repository']}/train_val_test_split",
                 "main",
                 parameters={
                     "input": "clean_sample.csv:latest",
@@ -115,7 +120,7 @@ def go(config: DictConfig):
 
         if "test_regression_model" in active_steps:
             _ = mlflow.run(
-                f"{config['main']['components_repository']}/test_regression_model",
+                os.path.join(hydra.utils.get_original_cwd(), "components", "test_regression_model"),
                 "main",
                 parameters={
                     "mlflow_model": "random_forest_export:prod",

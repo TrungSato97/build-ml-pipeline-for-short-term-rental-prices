@@ -1,13 +1,16 @@
+
 main:
   components_repository: "https://github.com/udacity/build-ml-pipeline-for-short-term-rental-prices#components"
-  # All the intermediate files will be copied to this directory at the end of the run.
+  # components_repository: "https://github.com/udacity/build-ml-pipeline-for-short-term-rental-prices#components"
+  # components_repository: r"C:\Users\truon\learning\code\udacity\mlops\NYC_project2\build-ml-pipeline-for-short-term-rental-prices\components"
+# All the intermediate files will be copied to this directory at the end of the run.
   # Set this to null if you are running in prod
   project_name: nyc_airbnb
   experiment_name: development
   steps: all
 etl:
   sample: "sample1.csv"
-  min_price: 10 # dollars
+  min_price: 10 # dollars 
   max_price: 350 # dollars
 data_check:
   kl_threshold: 0.2

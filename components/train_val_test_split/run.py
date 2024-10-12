@@ -8,6 +8,13 @@ import pandas as pd
 import wandb
 import tempfile
 from sklearn.model_selection import train_test_split
+
+import os
+# print(os.getcwd())
+# import sys
+# print(os.path.abspath(os.path.join(os.getcwd(), '..')))
+# # Thêm đường dẫn của wandb_utils vào sys.path
+# sys.path.append(os.path.abspath(os.getcwd()))
 from wandb_utils.log_artifact import log_artifact
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)-15s %(message)s")
@@ -36,18 +43,25 @@ def go(args):
 
     # Save to output files
     for df, k in zip([trainval, test], ['trainval', 'test']):
+        
         logger.info(f"Uploading {k}_data.csv dataset")
-        with tempfile.NamedTemporaryFile("w") as fp:
 
-            df.to_csv(fp.name, index=False)
+        # Sử dụng NamedTemporaryFile với delete=False
+        with tempfile.NamedTemporaryFile("w", delete=False, suffix=".csv", dir=os.getcwd()) as fp:
+            temp_file_path = fp.name  # Lưu đường dẫn tạm thời
+            df.to_csv(temp_file_path, index=False)  # Ghi dữ liệu vào file tạm thời
 
-            log_artifact(
-                f"{k}_data.csv",
-                f"{k}_data",
-                f"{k} split of dataset",
-                fp.name,
-                run,
-            )
+        # Tải lên artifact sử dụng log_artifact
+        log_artifact(
+            f"{k}_data.csv",  # Tên artifact
+            f"{k}_data",  # Loại artifact
+            f"{k} split of dataset",  # Mô tả artifact
+            temp_file_path,  # Đường dẫn tạm thời
+            run,
+        )
+
+        # Sau khi tải lên, xóa tệp tạm thời
+        os.remove(temp_file_path)
 
 
 if __name__ == "__main__":
