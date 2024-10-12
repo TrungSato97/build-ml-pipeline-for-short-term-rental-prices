@@ -125,55 +125,33 @@ accessed from the configuration file.
 In order to run the pipeline when you are developing, you need to be in the root of the starter kit, 
 then you can execute as usual:
 
-```bash
->  mlflow run .
-```
-This will run the entire pipeline.
+Run EDA step which will open a jupyter notebook
 
-When developing it is useful to be able to run one step at the time. Say you want to run only
-the ``download`` step. The `main.py` is written so that the steps are defined at the top of the file, in the 
-``_steps`` list, and can be selected by using the `steps` parameter on the command line:
 
 ```bash
-> mlflow run . -P steps=download
+mlflow run src/eda 
 ```
-If you want to run the ``download`` and the ``basic_cleaning`` steps, you can similarly do:
+
+Run data clean step
 ```bash
-> mlflow run . -P steps=download,basic_cleaning
+mlflow run . -P steps=basic_cleaning
 ```
-You can override any other parameter in the configuration file using the Hydra syntax, by
-providing it as a ``hydra_options`` parameter. For example, say that we want to set the parameter
-modeling -> random_forest -> n_estimators to 10 and etl->min_price to 50:
 
+Run a train_val_test_split
 ```bash
-> mlflow run . \
-  -P steps=download,basic_cleaning \
-  -P hydra_options="modeling.random_forest.n_estimators=10 etl.min_price=50"
+mlflow run . -P steps=data_split
 ```
 
-### Pre-existing components
-In order to simulate a real-world situation, we are providing you with some pre-implemented
-re-usable components. While you have a copy in your fork, you will be using them from the original
-repository by accessing them through their GitHub link, like:
-
-```python
-_ = mlflow.run(
-                f"{config['main']['components_repository']}/get_data",
-                "main",
-                parameters={
-                    "sample": config["etl"]["sample"],
-                    "artifact_name": "sample.csv",
-                    "artifact_type": "raw_data",
-                    "artifact_description": "Raw file as downloaded"
-                },
-            )
+Run a sweep of different hyperparameters to train the model. ```hydra/launcher=joblib``` enables parallel training.
+```bash
+mlflow run . -P steps=train_random_forest
 ```
-where `config['main']['components_repository']` is set to 
-[https://github.com/udacity/build-ml-pipeline-for-short-term-rental-prices#components](https://github.com/udacity/build-ml-pipeline-for-short-term-rental-prices/tree/main/components).
-You can see the parameters that they require by looking into their `MLproject` file:
 
-- `get_data`: downloads the data. [MLproject](https://github.com/udacity/build-ml-pipeline-for-short-term-rental-prices/blob/main/components/get_data/MLproject)
-- `train_val_test_split`: segrgate the data (splits the data) [MLproject](https://github.com/udacity/build-ml-pipeline-for-short-term-rental-prices/blob/main/components/train_val_test_split/MLproject)
+
+Test the model
+```bash
+mlflow run . -P steps=test_regression_model
+```
 
 ## In case of errors
 When you make an error writing your `conda.yml` file, you might end up with an environment for the pipeline or one
