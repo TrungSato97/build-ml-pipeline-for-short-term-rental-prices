@@ -38,7 +38,7 @@ and click on `Fork` in the upper right corner. This will create a fork in your G
 repository that is under your control. Now clone the repository locally so you can start working on it:
 
 ```
-git clone https://github.com/[your github username]/build-ml-pipeline-for-short-term-rental-prices.git
+git clone https://github.com/TrungSato97/build-ml-pipeline-for-short-term-rental-prices.git
 ```
 
 and go into the repository:
@@ -70,42 +70,6 @@ then paste your key into this command:
 You should see a message similar to:
 ```
 wandb: Appending key for api.wandb.ai to your netrc file: /home/[your username]/.netrc
-```
-
-### Cookie cutter
-In order to make your job a little easier, you are provided a cookie cutter template that you can use to create 
-stubs for new pipeline components. It is not required that you use this, but it might save you from a bit of 
-boilerplate code. Just run the cookiecutter and enter the required information, and a new component 
-will be created including the `conda.yml` file, the `MLproject` file as well as the script. You can then modify these
-as needed, instead of starting from scratch.
-For example:
-
-```bash
-> cookiecutter cookie-mlflow-step -o src
-
-step_name [step_name]: basic_cleaning
-script_name [run.py]: run.py
-job_type [my_step]: basic_cleaning
-short_description [My step]: This steps cleans the data
-long_description [An example of a step using MLflow and Weights & Biases]: Performs basic cleaning on the data and save the results in Weights & Biases
-parameters [parameter1,parameter2]: parameter1,parameter2,parameter3
-```
-
-This will create a step called ``basic_cleaning`` under the directory ``src`` with the following structure:
-
-```bash
-> ls src/basic_cleaning/
-conda.yml  MLproject  run.py
-```
-
-You can now modify the script (``run.py``), the conda environment (``conda.yml``) and the project definition 
-(``MLproject``) as you please.
-
-The script ``run.py`` will receive the input parameters ``parameter1``, ``parameter2``,
-``parameter3`` and it will be called like:
-
-```bash
-> mlflow run src/step_name -P parameter1=1 -P parameter2=2 -P parameter3="test"
 ```
 
 ### The configuration
